@@ -2,6 +2,9 @@ package session
 
 import (
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/google/uuid"
 	"github.com/paroxity/portal/event"
@@ -15,8 +18,6 @@ import (
 	"github.com/scylladb/go-set/i64set"
 	"github.com/scylladb/go-set/strset"
 	"go.uber.org/atomic"
-	"sync"
-	"time"
 )
 
 // Session stores the data for an active session on the proxy.
@@ -112,6 +113,8 @@ func (s *Session) dial(srv *server.Server) (*minecraft.Conn, error) {
 	return minecraft.Dialer{
 		ClientData:   s.conn.ClientData(),
 		IdentityData: i,
+
+		FlushRate: -1,
 	}.Dial("raknet", srv.Address())
 }
 
@@ -119,6 +122,11 @@ func (s *Session) dial(srv *server.Server) (*minecraft.Conn, error) {
 func (s *Session) login() (err error) {
 	var g sync.WaitGroup
 	g.Add(2)
+
+	data := s.serverConn.GameData()
+	data.PlayerMovementSettings.MovementType = protocol.PlayerMovementModeServerWithRewind
+	data.PlayerMovementSettings.RewindHistorySize = 100
+
 	go func() {
 		err = s.conn.StartGameTimeout(s.serverConn.GameData(), time.Minute)
 		g.Done()
