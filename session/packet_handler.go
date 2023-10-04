@@ -2,11 +2,12 @@ package session
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/paroxity/portal/event"
 	"github.com/sandertv/gophertunnel/minecraft"
 	"github.com/sandertv/gophertunnel/minecraft/protocol"
 	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
-	"sync"
 )
 
 // handlePackets handles the packets sent between the client and the server. Processes such as runtime
@@ -66,6 +67,8 @@ func handlePackets(s *Session) {
 
 						s.serverConn = s.tempServerConn
 						s.tempServerConn = nil
+
+						s.handler().HandleChangeConn(s.serverConn)
 						s.serverMu.Unlock()
 
 						s.updateTranslatorData(gameData)

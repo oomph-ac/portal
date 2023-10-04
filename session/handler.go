@@ -3,6 +3,7 @@ package session
 import (
 	"github.com/paroxity/portal/event"
 	"github.com/paroxity/portal/server"
+	"github.com/sandertv/gophertunnel/minecraft"
 	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
@@ -20,6 +21,9 @@ type Handler interface {
 	// HandleTransfer handles a session being transferred to another server. ctx.Cancel() may be called to
 	// cancel the transfer.
 	HandleTransfer(ctx *event.Context, svr *server.Server)
+	// HandleChangeConn handles a session's connection being changed. This is called when Portal sets the
+	// temporary server conn to the main server conn.
+	HandleChangeConn(conn *minecraft.Conn)
 	// HandleQuit handles the closing of a session. It is always called when the session is disconnected,
 	// regardless of the reason.
 	HandleQuit()
@@ -44,6 +48,9 @@ func (NopHandler) HandleServerDisconnect(*event.Context, error) {}
 
 // HandleTransfer ...
 func (NopHandler) HandleTransfer(*event.Context, *server.Server) {}
+
+// HandleChangeConn ...
+func (NopHandler) HandleChangeConn(*minecraft.Conn) {}
 
 // HandleQuit ...
 func (NopHandler) HandleQuit() {}
