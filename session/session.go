@@ -128,7 +128,7 @@ func (s *Session) login() (err error) {
 	data.PlayerMovementSettings.RewindHistorySize = 100
 
 	go func() {
-		err = s.conn.StartGameTimeout(s.serverConn.GameData(), time.Minute)
+		err = s.conn.StartGameTimeout(data, time.Minute)
 		g.Done()
 	}()
 	go func() {
